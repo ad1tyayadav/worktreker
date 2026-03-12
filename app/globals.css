@@ -1,26 +1,201 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ── Tailwind v4 Theme Configuration ── */
+@theme {
+  /* Colors */
+  --color-paper: #FAFAF7;
+  --color-paper-warm: #FFF9F0;
+  --color-card: #FFFEF7;
+  --color-card-hover: #FFF8E8;
+  --color-border: #1A1A2E;
+  --color-border-soft: rgba(26,26,46,0.15);
+  --color-ink: #1A1A2E;
+  --color-muted: #5A5A7A;
+  --color-ghost: #9090A8;
+  --color-accent: #E8312A;
+  --color-accent-strong: #C4261F;
+  --color-yellow: #FFD700;
+  --color-yellow-soft: #FFF8DC;
+  --color-blue: #5BB8F5;
+  --color-blue-soft: #EBF5FF;
+  --color-green: #4CAF50;
+  --color-green-soft: #E8F5E9;
+  --color-purple: #7C4DFF;
+  --color-purple-soft: #F3EDFF;
+  --color-danger: #E8312A;
+  --color-danger-soft: #FFF0F0;
+  --color-success: #4CAF50;
+  --color-success-soft: #E8F5E9;
+  --color-warning: #FFD700;
+  --color-warning-soft: #FFF8DC;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Fonts */
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-body: 'Nunito', sans-serif;
+  --font-retro: 'VT323', monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Shadows */
+  --shadow-hard: 4px 4px 0px #1A1A2E;
+  --shadow-hard-sm: 2px 2px 0px #1A1A2E;
+  --shadow-hard-lg: 6px 6px 0px #1A1A2E;
+  --shadow-hard-hover: 8px 8px 0px #1A1A2E;
+  --shadow-scroll-shadow: 0 4px 0px #1A1A2E;
+
+  /* Animations */
+  --animate-cursor-blink: cursor-blink 1s step-end infinite;
+  --animate-fade-in: fade-in 0.4s ease-out both;
+
+  @keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── CSS Custom Properties for non-Tailwind usage ── */
+@layer base {
+  :root {
+    color-scheme: light;
+    --text-hero: clamp(11px, 2.5vw, 22px);
+    --text-section: clamp(10px, 2vw, 18px);
+    --text-body: clamp(14px, 1.5vw, 18px);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* html {
+    overflow-x: hidden;
+  } */
+
+  body {
+    background-color: #FAFAF7;
+    color: #1A1A2E;
+    font-family: var(--font-body);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    /* overflow-x: hidden; */
+  }
+
+  a {
+    color: inherit;
+  }
+
+  ::selection {
+    background-color: rgba(232, 49, 42, 0.2);
+    color: #1A1A2E;
+  }
+}
+
+/* ── Utility Classes ── */
+@layer utilities {
+  .bg-pixel-grid {
+    background-color: #FAFAF7;
+    background-image:
+      radial-gradient(circle, rgba(26, 26, 46, 0.02) 1px, transparent 1px);
+    background-size: 16px 16px;
+    background-attachment: fixed;
+  }
+
+  .section-label {
+    font-family: var(--font-retro);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #1A1A2E;
+    opacity: 0.7;
+  }
+
+  .pixel-cursor::after {
+    content: "█";
+    animation: cursor-blink 1s step-end infinite;
+    margin-left: 4px;
+    color: #E8312A;
+    font-size: 0.8em;
+  }
+}
+
+/* ── Animations ── */
+@layer base {
+  @keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ── Component Styles ── */
+@layer components {
+  .font-pixel-heading {
+    font-family: var(--font-pixel);
+    font-size: var(--text-section);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+
+  .animate-page {
+    animation: fade-in 0.4s ease-out both;
+  }
+
+  .animate-drawer {
+    animation: slide-down 0.25s ease-out both;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #FAFAF7;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1A1A2E;
+    border: 2px solid #FAFAF7;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #7C4DFF;
+  }
 }
