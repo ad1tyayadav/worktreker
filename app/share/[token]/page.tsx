@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SharedClientView } from "@/components/features/SharedClientView";
 import { Card } from "@/components/ui/Card";
@@ -22,8 +23,18 @@ export default async function SharedPage({
     return (
       <div className="flex min-h-screen items-center justify-center bg-pixel-grid px-4 py-10">
         <div className="w-full max-w-md text-center animate-page">
-          <div className="font-pixel text-[13px] sm:text-[16px] tracking-[0.05em] text-accent mb-4">
-            WORK//TRACKER
+          <div className="mb-4 flex items-center justify-center gap-3 font-pixel text-[13px] sm:text-[16px] tracking-[0.05em] text-accent">
+            <span className="flex h-9 w-9 items-center justify-center rounded-sm border-2 border-ink bg-paper shadow-hard-sm">
+              <Image
+                src="/logo.png"
+                alt="Work//Treker logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
+                priority
+              />
+            </span>
+            Work//Treker
           </div>
           <Card className="p-6">
             <div className="font-pixel text-[10px] sm:text-[11px] uppercase tracking-[0.05em] text-ink">
@@ -56,8 +67,18 @@ export default async function SharedPage({
     return (
       <div className="flex min-h-screen items-center justify-center bg-pixel-grid px-4 py-10">
         <div className="w-full max-w-md text-center animate-page">
-          <div className="font-pixel text-[13px] sm:text-[16px] tracking-[0.05em] text-accent mb-4">
-            WORK//TRACKER
+          <div className="mb-4 flex items-center justify-center gap-3 font-pixel text-[13px] sm:text-[16px] tracking-[0.05em] text-accent">
+            <span className="flex h-9 w-9 items-center justify-center rounded-sm border-2 border-ink bg-paper shadow-hard-sm">
+              <Image
+                src="/logo.png"
+                alt="Work//Treker logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
+                priority
+              />
+            </span>
+            Work//Treker
           </div>
           <Card className="p-6">
             <div className="font-pixel text-[10px] sm:text-[11px] uppercase tracking-[0.05em] text-ink">
@@ -95,10 +116,10 @@ export default async function SharedPage({
 
   const { data: entries } = sectionIds.length
     ? await supabase
-        .from("entries")
-        .select(selectFields)
-        .in("section_id", sectionIds)
-        .order("created_at", { ascending: true })
+      .from("entries")
+      .select(selectFields)
+      .in("section_id", sectionIds)
+      .order("created_at", { ascending: true })
     : { data: [] };
 
   return (

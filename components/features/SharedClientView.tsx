@@ -2,14 +2,15 @@ import React from "react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatNumber, formatDate, formatCurrency } from "@/lib/format";
+import Image from "next/image";
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 
 const FormattedText = ({ text }: { text: string }) => {
   if (!text) return null;
-  
+
   const parts = text.split(URL_REGEX);
-  
+
   return (
     <>
       {parts.map((part, i) => {
@@ -268,8 +269,23 @@ export const SharedClientView = ({
 
       {/* Footer */}
       <div className="border-t-2 border-dashed border-ink pt-4 text-center">
-        <div className="font-retro text-xl text-ghost">
-          Powered by <span className="font-pixel text-[10px] text-accent">WORK//TRACKER</span>
+        <div className="font-retro text-xl text-ghost flex items-center justify-center gap-2">
+          <span>Powered by</span>
+
+          <span className="font-pixel text-[10px] text-accent flex items-center gap-2">
+
+            <span className="flex h-8 w-8 items-center justify-center rounded-sm border-2 border-ink bg-paper shadow-hard-sm">
+              <Image
+                src="/logo.png"
+                alt="Work//Treker logo"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain"
+                priority
+              />
+            </span>
+            Work//Treker
+          </span>
         </div>
       </div>
     </div>

@@ -126,14 +126,18 @@ create table if not exists share_links (
   client_id uuid references clients(id) on delete cascade,
   user_id uuid references profiles(id) on delete cascade,
   token text unique not null default encode(gen_random_bytes(16), 'hex'),
+  show_notes boolean default false,
+  show_references boolean default false,
+  show_rates boolean default false,
+  show_status boolean default true,
   is_active boolean default true,
   created_at timestamptz default now()
 );
 
 alter table share_links enable row level security;
 
-create policy "Share links are viewable by owner" on share_links
-  for select using (auth.uid() = user_id);
+create policy "Share links are viewable by owner or public when active" on share_links
+  for select using (is_active = true or auth.uid() = user_id);
 
 create policy "Share links can be inserted by owner" on share_links
   for insert with check (auth.uid() = user_id);
@@ -143,3 +147,5 @@ create policy "Share links can be updated by owner" on share_links
 
 create policy "Share links can be deleted by owner" on share_links
   for delete using (auth.uid() = user_id);
+
+

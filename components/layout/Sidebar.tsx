@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
@@ -32,7 +33,7 @@ export const Sidebar = ({ email }: { email: string }) => {
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:flex-col lg:border-r-2 lg:border-ink bg-card px-5 py-6">
         <div className="font-pixel text-[13px] tracking-[0.05em] text-accent">
-          WORK//TRACKER
+          Work//Treker
         </div>
         <nav className="mt-8 flex flex-col gap-1">
           {navLinks.map((link) => {
@@ -41,11 +42,10 @@ export const Sidebar = ({ email }: { email: string }) => {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-2 rounded-none border-2 px-3 py-3 font-body text-sm font-bold uppercase tracking-wide transition-all min-h-[44px] ${
-                  isActive
+                className={`flex items-center gap-2 rounded-none border-2 px-3 py-3 font-body text-sm font-bold uppercase tracking-wide transition-all min-h-[44px] ${isActive
                     ? "border-ink bg-yellow text-ink shadow-hard-sm"
                     : "border-transparent text-muted hover:border-ink hover:bg-card-hover hover:text-ink hover:shadow-hard-sm"
-                }`}
+                  }`}
               >
                 <span aria-hidden="true" className="font-retro text-lg text-accent">
                   {link.icon}
@@ -70,12 +70,21 @@ export const Sidebar = ({ email }: { email: string }) => {
 
       {/* Mobile top bar */}
       <header
-        className={`sticky top-0 z-40 flex items-center justify-between border-b-2 border-ink bg-card px-4 py-3 lg:hidden transition-shadow ${
-          scrolled ? "shadow-scroll-shadow" : ""
-        }`}
+        className={`sticky top-0 z-40 flex items-center justify-between border-b-2 border-ink bg-card px-4 py-3 lg:hidden transition-shadow ${scrolled ? "shadow-scroll-shadow" : ""
+          }`}
       >
-        <div className="font-pixel text-[11px] sm:text-[13px] tracking-[0.05em] text-accent">
-          WORK//TRACKER
+        <div className="flex items-center gap-2 font-pixel text-[11px] sm:text-[13px] tracking-[0.05em] text-accent">
+          <span className="flex h-7 w-7 items-center justify-center rounded-sm border-2 border-ink bg-paper shadow-hard-sm">
+            <Image
+              src="/logo.png"
+              alt="Work//Treker logo"
+              width={20}
+              height={20}
+              className="h-5 w-5 object-contain"
+              priority
+            />
+          </span>
+          Work//Treker
         </div>
         <button
           type="button"
@@ -112,9 +121,8 @@ export const Sidebar = ({ email }: { email: string }) => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-3 border-b border-dashed border-border-soft px-4 py-4 font-body text-base font-bold uppercase tracking-wide transition-colors min-h-[44px] ${
-                    isActive ? "bg-yellow text-ink" : "text-muted hover:bg-card-hover hover:text-ink"
-                  }`}
+                  className={`flex items-center gap-3 border-b border-dashed border-border-soft px-4 py-4 font-body text-base font-bold uppercase tracking-wide transition-colors min-h-[44px] ${isActive ? "bg-yellow text-ink" : "text-muted hover:bg-card-hover hover:text-ink"
+                    }`}
                 >
                   <span className="font-retro text-xl text-accent">{link.icon}</span>
                   {link.label}

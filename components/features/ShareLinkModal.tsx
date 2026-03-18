@@ -195,7 +195,7 @@ export const ShareLinkModal = ({ open, onClose, clientId, clientName }: ShareLin
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button type="button" variant="primary" onClick={handleCopy}>
-                    {copied ? "✓ Copied!" : "Copy Link"}
+                    {copied ? "Copied!" : "Copy Link"}
                   </Button>
                   {hasChanges ? (
                     <Button type="button" variant="secondary" onClick={handleGenerate}>
@@ -208,7 +208,7 @@ export const ShareLinkModal = ({ open, onClose, clientId, clientName }: ShareLin
                 </div>
                 {hasChanges ? (
                   <div className="font-retro text-lg text-accent">
-                    Visibility changed — click "Update & Regenerate" to apply. This will create a new link URL.
+                    Visibility changed -- click "Update & Regenerate" to apply. This will create a new link URL.
                   </div>
                 ) : (
                   <div className="font-retro text-lg text-ghost">
@@ -229,3 +229,4 @@ export const ShareLinkModal = ({ open, onClose, clientId, clientName }: ShareLin
     </Modal>
   );
 };
+

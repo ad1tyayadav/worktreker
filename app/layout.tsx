@@ -21,8 +21,58 @@ const retroFont = VT323({
 });
 
 export const metadata: Metadata = {
-  title: "Work//Tracker",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+  ),
+  title: {
+    default: "Work Treker",
+    template: "%s | Work//Treker",
+  },
   description: "Track your hustle. Get paid right.",
+  applicationName: "Work//Treker",
+  keywords: [
+    "work tracking",
+    "time tracking",
+    "client billing",
+    "invoicing",
+    "freelance",
+    "project tracking",
+  ],
+  authors: [{ name: "Work//Treker" }],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  icons: {
+    icon: [{ url: "/favicon.ico" }],
+    apple: [{ url: "/logo.png" }],
+  },
+  openGraph: {
+    title: "Work//Treker",
+    description: "Track your hustle. Get paid right.",
+    url: "/",
+    siteName: "Work//Treker",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Work//Treker logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Work//Treker",
+    description: "Track your hustle. Get paid right.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({

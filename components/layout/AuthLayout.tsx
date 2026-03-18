@@ -13,7 +13,7 @@ export const AuthLayout = ({
       <div className="relative z-10 w-full max-w-md animate-page">
         <div className="mb-8 text-center">
           <div className="font-pixel text-[13px] sm:text-[16px] tracking-[0.05em] text-accent pixel-cursor">
-            WORK//TRACKER
+            Work//Treker
           </div>
           <div className="mt-3 font-retro text-2xl text-muted">
             Track your hustle. Get paid right.
