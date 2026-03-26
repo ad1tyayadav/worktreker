@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Client, Section, Entry } from "@/lib/types";
+import { Client, Section, Entry, Invoice } from "@/lib/types";
+import { InvoiceTheme } from "@/components/features/InvoicePreview";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { SectionPanel } from "@/components/features/SectionPanel";
 import { NewClientModal } from "@/components/features/NewClientModal";
 import { ShareLinkModal } from "@/components/features/ShareLinkModal";
+import { InvoiceModal } from "@/components/features/InvoiceModal";
+import { InvoiceListCard } from "@/components/features/InvoiceListCard";
+import { InvoiceViewModal } from "@/components/features/InvoiceViewModal";
 import { createSectionAction } from "@/app/actions/sections";
 import { formatCurrency } from "@/lib/format";
 
@@ -15,10 +19,12 @@ export const ClientDetailPageClient = ({
   client,
   sections,
   entries,
+  invoices,
 }: {
   client: Client;
   sections: Section[];
   entries: Entry[];
+  invoices: Invoice[];
 }) => {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -27,6 +33,12 @@ export const ClientDetailPageClient = ({
   const [sectionTitle, setSectionTitle] = useState("");
   const [sectionError, setSectionError] = useState<string | null>(null);
   const [sectionSaving, setSectionSaving] = useState(false);
+
+  // Invoice state
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
+  const [viewTheme, setViewTheme] = useState<InvoiceTheme>("retro");
 
   const entryMap = useMemo(() => {
     const map = new Map<string, Entry[]>();
@@ -87,6 +99,20 @@ export const ClientDetailPageClient = ({
     setSectionSaving(false);
   };
 
+  const handleOpenCreateInvoice = () => {
+    setEditingInvoice(null);
+    setInvoiceModalOpen(true);
+  };
+
+  const handleEditInvoice = (inv: Invoice) => {
+    setEditingInvoice(inv);
+    setInvoiceModalOpen(true);
+  };
+
+  const handleViewInvoice = (inv: Invoice) => {
+    setViewingInvoice(inv);
+  };
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -99,6 +125,9 @@ export const ClientDetailPageClient = ({
           ) : null}
         </div>
         <div className="flex flex-wrap gap-3">
+          <Button type="button" variant="primary" onClick={handleOpenCreateInvoice}>
+            ✎ Invoice
+          </Button>
           <Button type="button" variant="secondary" onClick={() => setShareOpen(true)}>
             Share Link
           </Button>
@@ -131,6 +160,15 @@ export const ClientDetailPageClient = ({
           <div className="mt-1 font-retro text-lg text-muted">Paid</div>
         </Card>
       </div>
+
+      {/* Invoices List */}
+      <InvoiceListCard
+        invoices={invoices}
+        entries={entries}
+        clientId={client.id}
+        onEdit={handleEditInvoice}
+        onView={handleViewInvoice}
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="font-retro text-2xl uppercase tracking-[0.15em] text-muted">
@@ -193,6 +231,32 @@ export const ClientDetailPageClient = ({
       <NewClientModal open={editOpen} onClose={() => setEditOpen(false)} client={client} />
       <NewClientModal open={deleteOpen} onClose={() => setDeleteOpen(false)} client={client} startDelete />
       <ShareLinkModal open={shareOpen} onClose={() => setShareOpen(false)} clientId={client.id} clientName={client.name} />
+
+      {/* Invoice Modals */}
+      {invoiceModalOpen && (
+        <InvoiceModal
+          key={editingInvoice ? editingInvoice.id : "new"}
+          open={true}
+        onClose={() => {
+          setInvoiceModalOpen(false);
+          setEditingInvoice(null);
+        }}
+        clientId={client.id}
+        clientName={client.name}
+        sections={sections}
+        entries={entries}
+          invoice={editingInvoice}
+          onCreated={(_id, theme) => setViewTheme(theme)}
+        />
+      )}
+      <InvoiceViewModal
+        open={!!viewingInvoice}
+        onClose={() => setViewingInvoice(null)}
+        invoice={viewingInvoice}
+        entries={entries}
+        clientName={client.name}
+        initialTheme={viewTheme}
+      />
     </div>
   );
 };

@@ -148,4 +148,43 @@ create policy "Share links can be updated by owner" on share_links
 create policy "Share links can be deleted by owner" on share_links
   for delete using (auth.uid() = user_id);
 
+-- Invoices
+create table if not exists invoices (
+  id uuid default gen_random_uuid() primary key,
+  client_id uuid references clients(id) on delete cascade,
+  user_id uuid references profiles(id) on delete cascade,
+  invoice_number text not null,
+  title text default 'INVOICE',
+  from_name text,
+  from_email text,
+  from_address text,
+  to_name text,
+  to_email text,
+  to_address text,
+  issue_date date default current_date,
+  due_date date,
+  entry_ids jsonb default '[]'::jsonb,
+  notes text,
+  payment_info text,
+  tax_rate numeric default 0,
+  discount numeric default 0,
+  currency text default 'USD',
+  status text default 'draft',
+  created_at timestamptz default now()
+);
+
+alter table invoices enable row level security;
+
+create policy "Invoices are viewable by owner" on invoices
+  for select using (auth.uid() = user_id);
+
+create policy "Invoices can be inserted by owner" on invoices
+  for insert with check (auth.uid() = user_id);
+
+create policy "Invoices can be updated by owner" on invoices
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create policy "Invoices can be deleted by owner" on invoices
+  for delete using (auth.uid() = user_id);
+
 

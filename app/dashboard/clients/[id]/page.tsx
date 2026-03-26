@@ -54,9 +54,16 @@ export default async function ClientDetailPage({
         .order("created_at", { ascending: true })
     : { data: [], error: null };
 
+  const { data: invoices, error: invoicesError } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("client_id", id)
+    .order("created_at", { ascending: false });
+
   const errors = [
     sectionsError ? `Failed to load sections: ${sectionsError.message}` : null,
     entriesError ? `Failed to load entries: ${entriesError.message}` : null,
+    invoicesError ? `Failed to load invoices: ${invoicesError.message}` : null,
   ].filter(Boolean) as string[];
 
   return (
@@ -71,7 +78,12 @@ export default async function ClientDetailPage({
           </ul>
         </Card>
       ) : null}
-      <ClientDetailPageClient client={client} sections={sections || []} entries={entries || []} />
+      <ClientDetailPageClient
+        client={client}
+        sections={sections || []}
+        entries={entries || []}
+        invoices={invoices || []}
+      />
     </div>
   );
 }
