@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420" role="img" aria-label="Retro food meme">
+  <defs>
+    <style>
+      .bg { fill: #f6f2e9; }
+      .ink { fill: #1a1a2e; }
+      .accent { fill: #e8312a; }
+      .outline { stroke: #1a1a2e; stroke-width: 6; fill: none; }
+      .label { font: 700 22px 'Courier New', monospace; fill: #1a1a2e; }
+      .caption { font: 700 18px 'Courier New', monospace; fill: #1a1a2e; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="720" height="420" />
+  <rect class="outline" x="18" y="18" width="684" height="384" />
+  <rect class="accent" x="40" y="40" width="640" height="46" />
+  <text class="label" x="360" y="70" text-anchor="middle">FOOD DELIVERY MEME</text>
+  <rect class="outline" x="60" y="110" width="600" height="230" />
+  <circle class="ink" cx="250" cy="205" r="46" />
+  <circle class="ink" cx="470" cy="205" r="46" />
+  <rect class="ink" x="230" y="260" width="260" height="28" />
+  <rect class="accent" x="300" y="170" width="120" height="12" />
+  <rect class="accent" x="300" y="190" width="120" height="12" />
+  <text class="caption" x="360" y="372" text-anchor="middle">"HUNGRY DEV NEEDS XP"</text>
+</svg>

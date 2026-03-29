@@ -1,7 +1,15 @@
-﻿import Image from "next/image";
+﻿"use client";
+
+import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+
+import { Button } from "../ui/Button";
+import { Modal } from "../ui/Modal";
 
 export function Footer() {
+  const [foodModalOpen, setFoodModalOpen] = useState(false);
+
   return (
     <footer className="border-t-2 border-ink px-5 py-6 sm:px-8">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 sm:flex-row sm:justify-between">
@@ -21,9 +29,14 @@ export function Footer() {
           </span>
           Work//Treker
         </Link>
-        <p className="font-retro text-lg sm:text-xl text-ghost">
-          Built with coffee and pixels
-        </p>
+        <Button
+          type="button"
+          variant="secondary"
+          className="text-[9px] sm:text-[10px] px-4 sm:px-5"
+          onClick={() => setFoodModalOpen(true)}
+        >
+          I want some good food
+        </Button>
         <div className="flex items-center gap-4">
           <Link
             href="https://www.linkedin.com/in/aditya-yadav-39b20529a/"
@@ -60,6 +73,48 @@ export function Footer() {
           </Link>
         </div>
       </div>
+      <Modal
+        open={foodModalOpen}
+        onClose={() => setFoodModalOpen(false)}
+        title="Built with coffee and pixels"
+        className="max-w-xl max-h-[85vh] overflow-hidden"
+      >
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+          <p className="font-retro text-lg text-muted">
+            If this app helps, consider fueling the next sprint.
+          </p>
+          <div className="rounded-none border-2 border-ink bg-paper p-3 shadow-hard-sm">
+            <Image
+              src="/Gareeb.png"
+              alt="Retro food meme"
+              width={720}
+              height={420}
+              className="h-auto w-full max-h-64 sm:max-h-72 object-contain"
+              priority
+            />
+          </div>
+          <div className="rounded-none border-2 border-dashed border-ink bg-paper p-4 text-center">
+            <div className="mb-3 font-pixel text-[10px] uppercase tracking-[0.05em] text-muted">
+              Scan my QR to donate
+            </div>
+            <Image
+              src="/qr.png"
+              alt="Donate QR code"
+              width={280}
+              height={280}
+              className="mx-auto h-auto w-44 sm:w-52"
+            />
+          </div>
+          <Link
+            href="https://www.paypal.com/paypalme/adity4yadav"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 border-2 border-ink bg-accent px-4 py-3 font-pixel text-[10px] uppercase tracking-[0.05em] text-white shadow-hard transition-all duration-150 rounded-none hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm active:scale-[0.96] min-h-[44px]"
+          >
+            Donate via PayPal
+          </Link>
+        </div>
+      </Modal>
     </footer>
   );
 }
