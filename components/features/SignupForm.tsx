@@ -29,7 +29,7 @@ export const SignupForm = () => {
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `https://worktreker.online`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
     } catch {
