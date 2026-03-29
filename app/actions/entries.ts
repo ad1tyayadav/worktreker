@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { truncateRequired, truncate, sanitizeDbError } from "@/lib/sanitize";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export type ActionResult = { error?: string };
 
@@ -28,14 +30,14 @@ const numberOrNull = (value: FormDataEntryValue | null) => {
 export const createEntryAction = async (formData: FormData): Promise<ActionResult> => {
   const sectionId = String(formData.get("section_id") || "");
   const clientId = String(formData.get("client_id") || "");
-  const title = String(formData.get("title") || "").trim();
-  const unitType = String(formData.get("unit_type") || "").trim();
+  const title = truncateRequired(formData.get("title") as string, 200);
+  const unitType = truncateRequired(formData.get("unit_type") as string, 50);
   const unitCount = numberOrNull(formData.get("unit_count"));
   const billableUnits = numberOrNull(formData.get("billable_units"));
   const ratePerUnit = numberOrNull(formData.get("rate_per_unit"));
-  const currency = String(formData.get("currency") || "USD").trim() || "USD";
-  const notes = String(formData.get("notes") || "").trim();
-  const referenceUrl = String(formData.get("reference_url") || "").trim();
+  const currency = truncateRequired((formData.get("currency") as string) || "USD", 10);
+  const notes = truncate(formData.get("notes") as string, 5000);
+  const referenceUrl = truncate(formData.get("reference_url") as string, 2000);
   const status = String(formData.get("status") || "pending");
 
   if (!sectionId || !title || !unitType) {
@@ -45,6 +47,11 @@ export const createEntryAction = async (formData: FormData): Promise<ActionResul
   const { supabase, userId, error } = await getUserId();
   if (!userId) {
     return { error };
+  }
+
+  const ip = await getClientIp();
+  if (!rateLimit(`entry_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
   }
 
   const { error: insertError } = await supabase.from("entries").insert({
@@ -62,7 +69,7 @@ export const createEntryAction = async (formData: FormData): Promise<ActionResul
   });
 
   if (insertError) {
-    return { error: insertError.message };
+    return { error: sanitizeDbError(insertError) };
   }
 
   if (clientId) {
@@ -75,14 +82,14 @@ export const createEntryAction = async (formData: FormData): Promise<ActionResul
 export const updateEntryAction = async (formData: FormData): Promise<ActionResult> => {
   const entryId = String(formData.get("entry_id") || "");
   const clientId = String(formData.get("client_id") || "");
-  const title = String(formData.get("title") || "").trim();
-  const unitType = String(formData.get("unit_type") || "").trim();
+  const title = truncateRequired(formData.get("title") as string, 200);
+  const unitType = truncateRequired(formData.get("unit_type") as string, 50);
   const unitCount = numberOrNull(formData.get("unit_count"));
   const billableUnits = numberOrNull(formData.get("billable_units"));
   const ratePerUnit = numberOrNull(formData.get("rate_per_unit"));
-  const currency = String(formData.get("currency") || "USD").trim() || "USD";
-  const notes = String(formData.get("notes") || "").trim();
-  const referenceUrl = String(formData.get("reference_url") || "").trim();
+  const currency = truncateRequired((formData.get("currency") as string) || "USD", 10);
+  const notes = truncate(formData.get("notes") as string, 5000);
+  const referenceUrl = truncate(formData.get("reference_url") as string, 2000);
   const status = String(formData.get("status") || "pending");
 
   if (!entryId || !title || !unitType) {
@@ -92,6 +99,11 @@ export const updateEntryAction = async (formData: FormData): Promise<ActionResul
   const { supabase, userId, error } = await getUserId();
   if (!userId) {
     return { error };
+  }
+
+  const ip = await getClientIp();
+  if (!rateLimit(`entry_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
   }
 
   const { error: updateError } = await supabase
@@ -111,7 +123,7 @@ export const updateEntryAction = async (formData: FormData): Promise<ActionResul
     .eq("user_id", userId);
 
   if (updateError) {
-    return { error: updateError.message };
+    return { error: sanitizeDbError(updateError) };
   }
 
   if (clientId) {
@@ -134,6 +146,11 @@ export const deleteEntryAction = async (formData: FormData): Promise<ActionResul
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`entry_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: deleteError } = await supabase
     .from("entries")
     .delete()
@@ -141,7 +158,7 @@ export const deleteEntryAction = async (formData: FormData): Promise<ActionResul
     .eq("user_id", userId);
 
   if (deleteError) {
-    return { error: deleteError.message };
+    return { error: sanitizeDbError(deleteError) };
   }
 
   if (clientId) {
@@ -165,6 +182,11 @@ export const toggleEntryStatusAction = async (formData: FormData): Promise<Actio
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`entry_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: updateError } = await supabase
     .from("entries")
     .update({ status: nextStatus === "paid" ? "paid" : "pending" })
@@ -172,7 +194,7 @@ export const toggleEntryStatusAction = async (formData: FormData): Promise<Actio
     .eq("user_id", userId);
 
   if (updateError) {
-    return { error: updateError.message };
+    return { error: sanitizeDbError(updateError) };
   }
 
   if (clientId) {

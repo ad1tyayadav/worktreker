@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { createClient } from "@/lib/supabase/server";
 
 const features = [
   {
@@ -21,7 +22,7 @@ const features = [
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const jsonLd = {
     "@context": "https://schema.org",
@@ -33,6 +34,11 @@ export default function LandingPage() {
     url: siteUrl,
     image: siteUrl + "/logo.png",
   };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -59,18 +65,29 @@ export default function LandingPage() {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/auth/signup"
-                className="inline-flex items-center border-2 border-ink bg-accent px-5 py-3 sm:px-6 sm:py-3.5 font-pixel text-[10px] sm:text-[11px] uppercase tracking-[0.05em] text-white shadow-hard transition-all duration-150 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm active:scale-[0.96]"
-              >
-                Get Started &rarr;
-              </Link>
-              <Link
-                href="/auth/login"
-                className="inline-flex items-center border-2 border-ink bg-card px-5 py-3 sm:px-6 sm:py-3.5 font-pixel text-[10px] sm:text-[11px] uppercase tracking-[0.05em] text-ink shadow-hard transition-all duration-150 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm hover:bg-card-hover active:scale-[0.96]"
-              >
-                Login
-              </Link>
+              {user ? (
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center border-2 border-ink bg-accent px-5 py-3 sm:px-6 sm:py-3.5 font-pixel text-[10px] sm:text-[11px] uppercase tracking-[0.05em] text-white shadow-hard transition-all duration-150 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm active:scale-[0.96]"
+                >
+                  Go to Dashboard &rarr;
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/signup"
+                    className="inline-flex items-center border-2 border-ink bg-accent px-5 py-3 sm:px-6 sm:py-3.5 font-pixel text-[10px] sm:text-[11px] uppercase tracking-[0.05em] text-white shadow-hard transition-all duration-150 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm active:scale-[0.96]"
+                  >
+                    Get Started &rarr;
+                  </Link>
+                  {/* <Link
+                    href="/auth/login"
+                    className="inline-flex items-center border-2 border-ink bg-card px-5 py-3 sm:px-6 sm:py-3.5 font-pixel text-[10px] sm:text-[11px] uppercase tracking-[0.05em] text-ink shadow-hard transition-all duration-150 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm hover:bg-card-hover active:scale-[0.96]"
+                  >
+                    Login
+                  </Link> */}
+                </>
+              )}
             </div>
           </div>
         </section>

@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { truncateRequired, sanitizeDbError } from "@/lib/sanitize";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export type ActionResult = { error?: string };
 
@@ -21,7 +23,7 @@ const getUserId = async () => {
 
 export const createSectionAction = async (formData: FormData): Promise<ActionResult> => {
   const clientId = String(formData.get("client_id") || "");
-  const title = String(formData.get("title") || "").trim();
+  const title = truncateRequired(formData.get("title") as string, 200);
 
   if (!clientId || !title) {
     return { error: "Client id and title are required." };
@@ -32,6 +34,11 @@ export const createSectionAction = async (formData: FormData): Promise<ActionRes
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`section_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: insertError } = await supabase.from("sections").insert({
     client_id: clientId,
     title,
@@ -39,7 +46,7 @@ export const createSectionAction = async (formData: FormData): Promise<ActionRes
   });
 
   if (insertError) {
-    return { error: insertError.message };
+    return { error: sanitizeDbError(insertError) };
   }
 
   revalidatePath(`/dashboard/clients/${clientId}`);
@@ -49,7 +56,7 @@ export const createSectionAction = async (formData: FormData): Promise<ActionRes
 export const updateSectionAction = async (formData: FormData): Promise<ActionResult> => {
   const sectionId = String(formData.get("section_id") || "");
   const clientId = String(formData.get("client_id") || "");
-  const title = String(formData.get("title") || "").trim();
+  const title = truncateRequired(formData.get("title") as string, 200);
 
   if (!sectionId || !title) {
     return { error: "Section id and title are required." };
@@ -60,6 +67,11 @@ export const updateSectionAction = async (formData: FormData): Promise<ActionRes
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`section_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: updateError } = await supabase
     .from("sections")
     .update({ title })
@@ -67,7 +79,7 @@ export const updateSectionAction = async (formData: FormData): Promise<ActionRes
     .eq("user_id", userId);
 
   if (updateError) {
-    return { error: updateError.message };
+    return { error: sanitizeDbError(updateError) };
   }
 
   if (clientId) {
@@ -89,6 +101,11 @@ export const deleteSectionAction = async (formData: FormData): Promise<ActionRes
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`section_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: deleteError } = await supabase
     .from("sections")
     .delete()
@@ -96,7 +113,7 @@ export const deleteSectionAction = async (formData: FormData): Promise<ActionRes
     .eq("user_id", userId);
 
   if (deleteError) {
-    return { error: deleteError.message };
+    return { error: sanitizeDbError(deleteError) };
   }
 
   if (clientId) {

@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { truncateRequired, truncate, sanitizeDbError } from "@/lib/sanitize";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export type ActionResult = { error?: string };
 
@@ -20,9 +22,9 @@ const getUserId = async () => {
 };
 
 export const createClientAction = async (formData: FormData): Promise<ActionResult> => {
-  const name = String(formData.get("name") || "").trim();
-  const description = String(formData.get("description") || "").trim();
-  const color = String(formData.get("color") || "").trim();
+  const name = truncateRequired(formData.get("name") as string, 200);
+  const description = truncate(formData.get("description") as string, 5000);
+  const color = truncateRequired(formData.get("color") as string, 20);
 
   if (!name) {
     return { error: "Client name is required." };
@@ -33,6 +35,11 @@ export const createClientAction = async (formData: FormData): Promise<ActionResu
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`client_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: insertError } = await supabase.from("clients").insert({
     name,
     description: description || null,
@@ -41,7 +48,7 @@ export const createClientAction = async (formData: FormData): Promise<ActionResu
   });
 
   if (insertError) {
-    return { error: insertError.message };
+    return { error: sanitizeDbError(insertError) };
   }
 
   revalidatePath("/dashboard");
@@ -51,9 +58,9 @@ export const createClientAction = async (formData: FormData): Promise<ActionResu
 
 export const updateClientAction = async (formData: FormData): Promise<ActionResult> => {
   const id = String(formData.get("id") || "");
-  const name = String(formData.get("name") || "").trim();
-  const description = String(formData.get("description") || "").trim();
-  const color = String(formData.get("color") || "").trim();
+  const name = truncateRequired(formData.get("name") as string, 200);
+  const description = truncate(formData.get("description") as string, 5000);
+  const color = truncateRequired(formData.get("color") as string, 20);
 
   if (!id || !name) {
     return { error: "Client id and name are required." };
@@ -64,6 +71,11 @@ export const updateClientAction = async (formData: FormData): Promise<ActionResu
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`client_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: updateError } = await supabase
     .from("clients")
     .update({ name, description: description || null, color: color || "#2D5BE3" })
@@ -71,7 +83,7 @@ export const updateClientAction = async (formData: FormData): Promise<ActionResu
     .eq("user_id", userId);
 
   if (updateError) {
-    return { error: updateError.message };
+    return { error: sanitizeDbError(updateError) };
   }
 
   revalidatePath("/dashboard");
@@ -91,6 +103,11 @@ export const deleteClientAction = async (formData: FormData): Promise<ActionResu
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`client_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: deleteError } = await supabase
     .from("clients")
     .delete()
@@ -98,7 +115,7 @@ export const deleteClientAction = async (formData: FormData): Promise<ActionResu
     .eq("user_id", userId);
 
   if (deleteError) {
-    return { error: deleteError.message };
+    return { error: sanitizeDbError(deleteError) };
   }
 
   revalidatePath("/dashboard");

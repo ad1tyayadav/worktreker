@@ -42,7 +42,7 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
     const borderStyle = isRetro ? "border-ink" : "border-gray-200";
     const borderDashed = isRetro
       ? "border-dashed border-ink"
-      : "border-gray-100";
+      : "border-solid border-gray-200";
     const bgCard = isRetro ? "bg-white" : "bg-white";
     const shadowStyle = isRetro ? "shadow-hard-lg border-2 border-ink" : "shadow-lg border border-gray-200 rounded-lg";
 

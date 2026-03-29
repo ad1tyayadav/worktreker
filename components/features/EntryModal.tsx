@@ -7,15 +7,10 @@ import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { createEntryAction, deleteEntryAction, updateEntryAction } from "@/app/actions/entries";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import { formatCurrency, formatNumber, CURRENCIES } from "@/lib/format";
 import { Entry } from "@/lib/types";
 
 const presets = ["Reel", "Short", "Graphic", "Post", "Story", "Video", "Custom"];
-
-const currencyOptions = [
-  { value: "USD", label: "USD ($)" },
-  { value: "INR", label: "INR (Rs)" },
-];
 
 type EntryModalProps = {
   open: boolean;
@@ -229,7 +224,7 @@ export const EntryModal = ({
               value={currency}
               onChange={(event) => setCurrency(event.target.value)}
             >
-              {currencyOptions.map((option) => (
+              {CURRENCIES.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>

@@ -38,7 +38,7 @@ export const InvoiceViewModal = ({
         entries,
         clientName,
         theme,
-      }, `${invoice.invoice_number}.pdf`);
+      });
     } catch (err) {
       console.error("PDF download failed:", err);
     }
@@ -89,9 +89,6 @@ export const InvoiceViewModal = ({
               disabled={downloading}
             >
               {downloading ? "Generating PDF..." : "⬇ Download PDF"}
-            </Button>
-            <Button type="button" variant="ghost" onClick={onClose}>
-              Close
             </Button>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export type AuthState = {
   error?: string;
@@ -25,6 +26,13 @@ export const loginAction = async (
 
   if (!email || !password) {
     return { error: "Email and password are required." };
+  }
+
+  const ip = await getClientIp();
+  const limitResult = rateLimit(`login_${ip}`, 5, 60000);
+  if (!limitResult.success) {
+    const resetSeconds = Math.ceil((limitResult.resetTime - Date.now()) / 1000);
+    return { error: `Too many login attempts. Try again in ${resetSeconds}s.` };
   }
 
   const supabase = await createClient();
@@ -55,6 +63,17 @@ export const signupAction = async (
 
   if (!fullName || !email || !password) {
     return { error: "Full name, email, and password are required." };
+  }
+
+  if (password.length < 8) {
+    return { error: "Password must be at least 8 characters." };
+  }
+
+  const ip = await getClientIp();
+  const limitResult = rateLimit(`signup_${ip}`, 5, 60000);
+  if (!limitResult.success) {
+    const resetSeconds = Math.ceil((limitResult.resetTime - Date.now()) / 1000);
+    return { error: `Too many signup attempts. Try again in ${resetSeconds}s.` };
   }
 
   const supabase = await createClient();

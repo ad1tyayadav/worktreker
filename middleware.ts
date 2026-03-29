@@ -9,7 +9,13 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const isAuthRoute = pathname.startsWith("/auth");
+  const isCallbackRoute = pathname === "/auth/callback";
   const isDashboardRoute = pathname.startsWith("/dashboard");
+
+  // Let the callback route handle its own logic
+  if (isCallbackRoute) {
+    return response;
+  }
 
   if (!user && isDashboardRoute) {
     const redirectUrl = request.nextUrl.clone();

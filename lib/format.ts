@@ -1,3 +1,15 @@
+export const CURRENCIES = [
+  { value: "USD", label: "USD ($)" },
+  { value: "EUR", label: "EUR (€)" },
+  { value: "GBP", label: "GBP (£)" },
+  { value: "INR", label: "INR (₹)" },
+  { value: "CAD", label: "CAD ($)" },
+  { value: "AUD", label: "AUD ($)" },
+  { value: "JPY", label: "JPY (¥)" },
+  { value: "SGD", label: "SGD ($)" },
+  { value: "AED", label: "AED (د.إ)" },
+];
+
 export const formatCurrency = (value: number, currency: string = "USD") => {
   if (Number.isNaN(value)) return "-";
   return new Intl.NumberFormat("en-US", {

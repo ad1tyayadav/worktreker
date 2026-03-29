@@ -6,9 +6,11 @@ import { InvoiceTheme } from "@/components/features/InvoicePreview";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { createInvoiceAction, updateInvoiceAction } from "@/app/actions/invoices";
 import { generateInvoicePdf } from "@/lib/pdf";
+import { CURRENCIES } from "@/lib/format";
 
 type InvoiceModalProps = {
   open: boolean;
@@ -362,14 +364,19 @@ export const InvoiceModal = ({
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
-          <Input
+          <Select
             id="inv-currency"
             label="Currency"
             value={currency}
-            onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-            placeholder="USD"
+            onChange={(e) => setCurrency(e.target.value)}
             required
-          />
+          >
+            {CURRENCIES.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Select>
         </div>
 
         {/* Entry Selection */}
@@ -470,15 +477,7 @@ export const InvoiceModal = ({
 
         {/* Notes with Import */}
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Textarea
-              id="inv-notes"
-              label="Notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              placeholder="Thank you for your business!"
-            />
+          <div className="grid gap-3 sm:grid-cols-1">
             <Textarea
               id="inv-payment"
               label="Payment / Bank Details"
@@ -486,6 +485,14 @@ export const InvoiceModal = ({
               onChange={(e) => setPaymentInfo(e.target.value)}
               rows={3}
               placeholder="Bank details, wire instructions, etc."
+            />
+            <Textarea
+              id="inv-notes"
+              label="Notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              placeholder="Thank you for your business!"
             />
           </div>
           {selectedHaveNotes && (

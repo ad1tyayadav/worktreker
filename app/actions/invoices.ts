@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { truncate, sanitizeDbError } from "@/lib/sanitize";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export type ActionResult = { error?: string };
 
@@ -28,23 +30,23 @@ const generateInvoiceNumber = () => {
 };
 
 export const createInvoiceAction = async (formData: FormData): Promise<ActionResult & { invoiceId?: string }> => {
-  const customNumber = String(formData.get("invoice_number") || "").trim();
-  const invoiceTitle = String(formData.get("title") || "").trim();
+  const customNumber = truncate(formData.get("invoice_number") as string, 50) || "";
+  const invoiceTitle = truncate(formData.get("title") as string, 200) || "";
   const clientId = String(formData.get("client_id") || "");
-  const fromName = String(formData.get("from_name") || "").trim();
-  const fromEmail = String(formData.get("from_email") || "").trim();
-  const fromAddress = String(formData.get("from_address") || "").trim();
-  const toName = String(formData.get("to_name") || "").trim();
-  const toEmail = String(formData.get("to_email") || "").trim();
-  const toAddress = String(formData.get("to_address") || "").trim();
+  const fromName = truncate(formData.get("from_name") as string, 200) || "";
+  const fromEmail = truncate(formData.get("from_email") as string, 200) || "";
+  const fromAddress = truncate(formData.get("from_address") as string, 500) || "";
+  const toName = truncate(formData.get("to_name") as string, 200) || "";
+  const toEmail = truncate(formData.get("to_email") as string, 200) || "";
+  const toAddress = truncate(formData.get("to_address") as string, 500) || "";
   const issueDate = String(formData.get("issue_date") || "").trim();
   const dueDate = String(formData.get("due_date") || "").trim();
   const entryIdsRaw = String(formData.get("entry_ids") || "[]");
-  const notes = String(formData.get("notes") || "").trim();
-  const paymentInfo = String(formData.get("payment_info") || "").trim();
+  const notes = truncate(formData.get("notes") as string, 5000) || "";
+  const paymentInfo = truncate(formData.get("payment_info") as string, 5000) || "";
   const taxRate = Number(formData.get("tax_rate")) || 0;
   const discount = Number(formData.get("discount")) || 0;
-  const currency = String(formData.get("currency") || "USD").trim() || "USD";
+  const currency = truncate((formData.get("currency") as string) || "USD", 10) || "USD";
 
   if (!clientId) {
     return { error: "Client is required." };
@@ -60,6 +62,11 @@ export const createInvoiceAction = async (formData: FormData): Promise<ActionRes
   const { supabase, userId, error } = await getUserId();
   if (!userId) {
     return { error };
+  }
+
+  const ip = await getClientIp();
+  if (!rateLimit(`invoice_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
   }
 
   const invoiceNumber = customNumber || generateInvoiceNumber();
@@ -91,7 +98,7 @@ export const createInvoiceAction = async (formData: FormData): Promise<ActionRes
     .single();
 
   if (insertError) {
-    return { error: insertError.message };
+    return { error: sanitizeDbError(insertError) };
   }
 
   revalidatePath(`/dashboard/clients/${clientId}`);
@@ -100,22 +107,22 @@ export const createInvoiceAction = async (formData: FormData): Promise<ActionRes
 
 export const updateInvoiceAction = async (formData: FormData): Promise<ActionResult> => {
   const invoiceId = String(formData.get("invoice_id") || "");
-  const invoiceTitle = String(formData.get("title") || "").trim();
+  const invoiceTitle = truncate(formData.get("title") as string, 200) || "";
   const clientId = String(formData.get("client_id") || "");
-  const fromName = String(formData.get("from_name") || "").trim();
-  const fromEmail = String(formData.get("from_email") || "").trim();
-  const fromAddress = String(formData.get("from_address") || "").trim();
-  const toName = String(formData.get("to_name") || "").trim();
-  const toEmail = String(formData.get("to_email") || "").trim();
-  const toAddress = String(formData.get("to_address") || "").trim();
+  const fromName = truncate(formData.get("from_name") as string, 200) || "";
+  const fromEmail = truncate(formData.get("from_email") as string, 200) || "";
+  const fromAddress = truncate(formData.get("from_address") as string, 500) || "";
+  const toName = truncate(formData.get("to_name") as string, 200) || "";
+  const toEmail = truncate(formData.get("to_email") as string, 200) || "";
+  const toAddress = truncate(formData.get("to_address") as string, 500) || "";
   const issueDate = String(formData.get("issue_date") || "").trim();
   const dueDate = String(formData.get("due_date") || "").trim();
   const entryIdsRaw = String(formData.get("entry_ids") || "[]");
-  const notes = String(formData.get("notes") || "").trim();
-  const paymentInfo = String(formData.get("payment_info") || "").trim();
+  const notes = truncate(formData.get("notes") as string, 5000) || "";
+  const paymentInfo = truncate(formData.get("payment_info") as string, 5000) || "";
   const taxRate = Number(formData.get("tax_rate")) || 0;
   const discount = Number(formData.get("discount")) || 0;
-  const currency = String(formData.get("currency") || "USD").trim() || "USD";
+  const currency = truncate((formData.get("currency") as string) || "USD", 10) || "USD";
 
   if (!invoiceId) {
     return { error: "Invoice id is required." };
@@ -131,6 +138,11 @@ export const updateInvoiceAction = async (formData: FormData): Promise<ActionRes
   const { supabase, userId, error } = await getUserId();
   if (!userId) {
     return { error };
+  }
+
+  const ip = await getClientIp();
+  if (!rateLimit(`invoice_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
   }
 
   const invoiceNumber = String(formData.get("invoice_number") || "").trim();
@@ -164,7 +176,7 @@ export const updateInvoiceAction = async (formData: FormData): Promise<ActionRes
     .eq("user_id", userId);
 
   if (updateError) {
-    return { error: updateError.message };
+    return { error: sanitizeDbError(updateError) };
   }
 
   if (clientId) {
@@ -186,6 +198,11 @@ export const deleteInvoiceAction = async (formData: FormData): Promise<ActionRes
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`invoice_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: deleteError } = await supabase
     .from("invoices")
     .delete()
@@ -193,7 +210,7 @@ export const deleteInvoiceAction = async (formData: FormData): Promise<ActionRes
     .eq("user_id", userId);
 
   if (deleteError) {
-    return { error: deleteError.message };
+    return { error: sanitizeDbError(deleteError) };
   }
 
   if (clientId) {
@@ -221,6 +238,11 @@ export const updateInvoiceStatusAction = async (formData: FormData): Promise<Act
     return { error };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`invoice_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const { error: updateError } = await supabase
     .from("invoices")
     .update({ status })
@@ -228,7 +250,7 @@ export const updateInvoiceStatusAction = async (formData: FormData): Promise<Act
     .eq("user_id", userId);
 
   if (updateError) {
-    return { error: updateError.message };
+    return { error: sanitizeDbError(updateError) };
   }
 
   if (clientId) {

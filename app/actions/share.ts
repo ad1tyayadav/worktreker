@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { sanitizeDbError } from "@/lib/sanitize";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function createShareLinkAction(formData: FormData) {
   const user = await requireUser();
@@ -11,6 +13,11 @@ export async function createShareLinkAction(formData: FormData) {
   const showReferences = formData.get("show_references") === "true";
   const showRates = formData.get("show_rates") === "true";
   const showStatus = formData.get("show_status") === "true";
+
+  const ip = await getClientIp();
+  if (!rateLimit(`share_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
 
   if (!clientId) {
     return { error: "Client ID is required." };
@@ -39,7 +46,7 @@ export async function createShareLinkAction(formData: FormData) {
     .single();
 
   if (error) {
-    return { error: `Failed to create share link: ${error.message}` };
+    return { error: sanitizeDbError(error) };
   }
 
   revalidatePath(`/dashboard/clients/${clientId}`);
@@ -54,6 +61,11 @@ export async function deleteShareLinkAction(formData: FormData) {
     return { error: "Client ID is required." };
   }
 
+  const ip = await getClientIp();
+  if (!rateLimit(`share_mutate_${ip}`, 30, 60000).success) {
+    return { error: "Too many actions. Please try again later." };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -63,7 +75,7 @@ export async function deleteShareLinkAction(formData: FormData) {
     .eq("is_active", true);
 
   if (error) {
-    return { error: `Failed to revoke share link: ${error.message}` };
+    return { error: sanitizeDbError(error) };
   }
 
   revalidatePath(`/dashboard/clients/${clientId}`);
@@ -83,7 +95,7 @@ export async function getShareLinkAction(clientId: string) {
     .maybeSingle();
 
   if (error) {
-    return { error: `Failed to fetch share link: ${error.message}` };
+    return { error: sanitizeDbError(error) };
   }
 
   return { shareLink: data };

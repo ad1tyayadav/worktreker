@@ -4,11 +4,12 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { truncate, sanitizeDbError } from "@/lib/sanitize";
 
 export type ActionResult = { error?: string };
 
 export const updateProfileAction = async (formData: FormData): Promise<ActionResult> => {
-  const fullName = String(formData.get("full_name") || "").trim();
+  const fullName = truncate(formData.get("full_name") as string, 200) || "";
 
   const supabase = await createClient();
   const {
@@ -26,7 +27,7 @@ export const updateProfileAction = async (formData: FormData): Promise<ActionRes
     .eq("id", user.id);
 
   if (updateError) {
-    return { error: updateError.message };
+    return { error: sanitizeDbError(updateError) };
   }
 
   revalidatePath("/dashboard/settings");
@@ -38,6 +39,10 @@ export const changePasswordAction = async (formData: FormData): Promise<ActionRe
 
   if (!password) {
     return { error: "Password is required." };
+  }
+
+  if (password.length < 8) {
+    return { error: "Password must be at least 8 characters." };
   }
 
   const supabase = await createClient();
@@ -66,7 +71,7 @@ export const deleteAccountAction = async (): Promise<ActionResult> => {
     const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
-      return { error: deleteError.message };
+      return { error: sanitizeDbError(deleteError) };
     }
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Delete failed" };
