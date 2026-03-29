@@ -85,7 +85,7 @@ export function Footer() {
           </p>
           <div className="rounded-none border-2 border-ink bg-paper p-3 shadow-hard-sm">
             <Image
-              src="/Gareeb.png"
+              src="/poor.gif"
               alt="Retro food meme"
               width={720}
               height={420}
