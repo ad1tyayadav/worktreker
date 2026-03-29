@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Press_Start_2P, Nunito, VT323 } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 const pixelFont = Press_Start_2P({
   variable: "--font-pixel",
@@ -82,6 +83,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Analytics />
       <body
         className={`${pixelFont.variable} ${bodyFont.variable} ${retroFont.variable} min-h-screen bg-pixel-grid font-body text-ink antialiased`}
       >
