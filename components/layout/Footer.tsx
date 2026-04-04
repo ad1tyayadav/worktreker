@@ -29,14 +29,43 @@ export function Footer() {
           </span>
           Work//Treker
         </Link>
-        <Button
+        <div className="flex items-center gap-3 flex-wrap justify-center">
+          <a
+            href="https://www.producthunt.com/products/work-treker?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-work-treker"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1110905&theme=light&t=1775325340756"
+              alt="Work Treker - Track right - don't lose trust | Product Hunt"
+              width={250}
+              height={54}
+              unoptimized
+            />
+          </a>
+          <a
+            href="https://peerlist.io/ad1ty4/project/work-treker"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Image
+              src="https://peerlist.io/api/v1/projects/embed/PRJHOK8GGNPK6ROED2A6OPLR7KM8EO?showUpvote=true&theme=light"
+              alt="Work Treker"
+              width={0}
+              height={72}
+              style={{ width: "auto", height: "72px" }}
+              unoptimized
+            />
+          </a>
+        </div>
+        {/* <Button
           type="button"
           variant="secondary"
           className="text-[9px] sm:text-[10px] px-4 sm:px-5"
           onClick={() => setFoodModalOpen(true)}
         >
           I want some good food
-        </Button>
+        </Button> */}
         <div className="flex items-center gap-4">
           <Link
             href="https://www.linkedin.com/in/aditya-yadav-39b20529a/"

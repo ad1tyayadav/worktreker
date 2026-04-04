@@ -28,6 +28,18 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "api.producthunt.com",
+      },
+      {
+        protocol: "https",
+        hostname: "peerlist.io",
+      },
+    ],
+  },
   async headers() {
     return [
       {
