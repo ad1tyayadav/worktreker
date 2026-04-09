@@ -1,37 +1,9 @@
-import React from "react";
+﻿import React from "react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatNumber, formatDate, formatCurrency } from "@/lib/format";
 import Image from "next/image";
-
-const URL_REGEX = /(https?:\/\/[^\s]+)/g;
-
-const FormattedText = ({ text }: { text: string }) => {
-  if (!text) return null;
-
-  const parts = text.split(URL_REGEX);
-
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (part.match(URL_REGEX)) {
-          return (
-            <a
-              key={i}
-              href={part}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-retro text-lg text-blue underline decoration-dashed underline-offset-4 transition-colors hover:text-purple"
-            >
-              {part}
-            </a>
-          );
-        }
-        return <span key={i}>{part}</span>;
-      })}
-    </>
-  );
-};
+import { FormattedText } from "@/components/common/FormattedText";
 
 type SharedSection = {
   id: string;
@@ -291,3 +263,6 @@ export const SharedClientView = ({
     </div>
   );
 };
+
+
+

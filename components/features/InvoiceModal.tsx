@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo } from "react";
 import { Section, Entry, Invoice } from "@/lib/types";
@@ -106,7 +106,7 @@ export const InvoiceModal = ({
     const selected = entries.filter((e) => selectedEntryIds.has(e.id));
     const entryNotes = selected
       .filter((e) => e.notes && e.notes.trim())
-      .map((e) => `• ${e.title}: ${e.notes}`)
+      .map((e) => `${e.title}: ${e.notes}`)
       .join("\n");
     if (!entryNotes) return;
     setNotes((prev) => {
@@ -492,7 +492,7 @@ export const InvoiceModal = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="Thank you for your business!"
+              placeholder="Tip: Use [Video title](https://...) to add a link over text."
             />
           </div>
           {selectedHaveNotes && (
@@ -543,3 +543,6 @@ export const InvoiceModal = ({
     </Modal>
   );
 };
+
+
+

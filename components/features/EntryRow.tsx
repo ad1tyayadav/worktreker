@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useTransition } from "react";
 import { Badge } from "@/components/ui/Badge";
@@ -7,41 +7,13 @@ import { Modal } from "@/components/ui/Modal";
 import { toggleEntryStatusAction } from "@/app/actions/entries";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { Entry } from "@/lib/types";
+import { FormattedText } from "@/components/common/FormattedText";
 
 type EntryRowProps = {
   entry: Entry;
   clientId: string;
   onEdit: (entry: Entry) => void;
   onDelete: (entry: Entry) => void;
-};
-
-const URL_REGEX = /(https?:\/\/[^\s]+)/g;
-
-const FormattedText = ({ text }: { text: string }) => {
-  if (!text) return null;
-  
-  const parts = text.split(URL_REGEX);
-  
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (part.match(URL_REGEX)) {
-          return (
-            <a
-              key={i}
-              href={part}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-retro text-lg text-blue underline decoration-dashed underline-offset-4 transition-colors hover:text-purple"
-            >
-              {part}
-            </a>
-          );
-        }
-        return <span key={i}>{part}</span>;
-      })}
-    </>
-  );
 };
 
 export const EntryRow = ({ entry, clientId, onEdit, onDelete }: EntryRowProps) => {
@@ -150,3 +122,6 @@ export const EntryRow = ({ entry, clientId, onEdit, onDelete }: EntryRowProps) =
     </>
   );
 };
+
+
+

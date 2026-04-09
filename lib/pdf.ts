@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import jsPDF from "jspdf";
 import { Entry, Invoice } from "@/lib/types";
@@ -28,6 +28,54 @@ const PAGE_W = 210;
 const PAGE_H = 297;
 const MARGIN = 15;
 const CONTENT_W = PAGE_W - MARGIN * 2;
+type NoteSegment = { text: string; url?: string };
+
+const tokenizeNotes = (notes: string): NoteSegment[] => {
+  const mdLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+  const rawUrlRegex = /https?:\/\/[^\s]+/g;
+  const segments: NoteSegment[] = [];
+
+  let cursor = 0;
+  while (cursor < notes.length) {
+    mdLinkRegex.lastIndex = cursor;
+    rawUrlRegex.lastIndex = cursor;
+
+    const mdMatch = mdLinkRegex.exec(notes);
+    const rawMatch = rawUrlRegex.exec(notes);
+
+    const next =
+      mdMatch && rawMatch
+        ? mdMatch.index <= rawMatch.index
+          ? { kind: "md" as const, match: mdMatch }
+          : { kind: "raw" as const, match: rawMatch }
+        : mdMatch
+        ? { kind: "md" as const, match: mdMatch }
+        : rawMatch
+        ? { kind: "raw" as const, match: rawMatch }
+        : null;
+
+    if (!next) {
+      segments.push({ text: notes.slice(cursor) });
+      break;
+    }
+
+    const index = next.match.index;
+    if (index > cursor) segments.push({ text: notes.slice(cursor, index) });
+
+    if (next.kind === "md") {
+      const [, label, url] = next.match;
+      segments.push({ text: label, url });
+      cursor = index + next.match[0].length;
+      continue;
+    }
+
+    const url = next.match[0];
+    segments.push({ text: url, url });
+    cursor = index + url.length;
+  }
+
+  return segments;
+};
 
 const ensureSpace = (pdf: jsPDF, y: number, needed: number): number => {
   if (y + needed > PAGE_H - MARGIN) {
@@ -35,6 +83,69 @@ const ensureSpace = (pdf: jsPDF, y: number, needed: number): number => {
     return MARGIN;
   }
   return y;
+};
+const renderTextWithLinks = (
+  pdf: jsPDF,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineH: number,
+  normalColor: [number, number, number] = COLORS.muted,
+  linkColor: [number, number, number] = [0, 0, 255]
+) => {
+  const lines = text.split(/\r?\n/);
+  let cursorY = y;
+
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li];
+    const segments = tokenizeNotes(line);
+
+    let cursorX = x;
+    for (const seg of segments) {
+      const parts = seg.text.split(/(\s+)/);
+      for (const part of parts) {
+        if (!part) continue;
+        const isWhitespace = /^\s+$/.test(part);
+        const partW = pdf.getTextWidth(part);
+
+        if (!isWhitespace && cursorX !== x && cursorX + partW > x + maxWidth) {
+          cursorY = ensureSpace(pdf, cursorY, lineH + 1);
+          cursorY += lineH;
+          cursorX = x;
+        }
+
+        if (seg.url && !isWhitespace) {
+          pdf.setTextColor(...linkColor);
+
+          const anyPdf = pdf as any;
+          if (typeof anyPdf.textWithLink === "function") {
+            anyPdf.textWithLink(part, cursorX, cursorY, { url: seg.url });
+          } else {
+            pdf.text(part, cursorX, cursorY);
+          }
+
+          pdf.setDrawColor(...linkColor);
+          pdf.setLineWidth(0.2);
+          pdf.line(cursorX, cursorY + 0.8, cursorX + partW, cursorY + 0.8);
+
+          pdf.setTextColor(...normalColor);
+        } else {
+          pdf.setTextColor(...normalColor);
+          pdf.text(part, cursorX, cursorY);
+        }
+
+        cursorX += partW;
+      }
+    }
+
+    if (li !== lines.length - 1) {
+      cursorY = ensureSpace(pdf, cursorY, lineH + 1);
+      cursorY += lineH;
+    }
+  }
+
+  return cursorY;
 };
 
 const drawLine = (pdf: jsPDF, x1: number, y: number, x2: number, color: [number, number, number] = COLORS.border, width = 0.5) => {
@@ -102,15 +213,15 @@ function generateTextPdf(options: PdfOptions, filename: string) {
 
   let y = MARGIN;
 
-  // ── Background ──
+  // â”€â”€ Background â”€â”€
   if (isRetro) {
     pdf.setFillColor(...COLORS.paper);
     pdf.rect(0, 0, PAGE_W, PAGE_H, "F");
   }
 
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  HEADER
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   pdf.setFont(headingFont, "bold");
   pdf.setFontSize(isRetro ? 22 : 26);
   pdf.setTextColor(...(isRetro ? COLORS.accent : COLORS.ink));
@@ -128,9 +239,9 @@ function generateTextPdf(options: PdfOptions, filename: string) {
   drawLine(pdf, MARGIN, y, PAGE_W - MARGIN, COLORS.border, 0.8);
   y += 6;
 
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  FROM / TO / DETAILS
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   const colW = CONTENT_W / 3;
 
   const renderInfoBlock = (label: string, lines: (string | null)[], startX: number) => {
@@ -202,9 +313,9 @@ function generateTextPdf(options: PdfOptions, filename: string) {
   }
   y += 6;
 
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  LINE ITEMS TABLE
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   const cols = [
     { label: "Item", x: MARGIN, w: CONTENT_W * 0.42 },
     { label: "Qty", x: MARGIN + CONTENT_W * 0.42, w: CONTENT_W * 0.13 },
@@ -291,9 +402,9 @@ function generateTextPdf(options: PdfOptions, filename: string) {
 
   y += 4;
 
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  TOTALS
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   y = ensureSpace(pdf, y, 30);
   drawLine(pdf, MARGIN, y, PAGE_W - MARGIN, COLORS.border, 0.6);
   y += 6;
@@ -350,9 +461,9 @@ function generateTextPdf(options: PdfOptions, filename: string) {
 
   y = Math.max(pY, tY);
 
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  NOTES
-  // ═══════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   if (invoice.notes) {
     y = ensureSpace(pdf, y, 20);
     if (isRetro) {
@@ -371,15 +482,10 @@ function generateTextPdf(options: PdfOptions, filename: string) {
     pdf.setFont(bodyFont, "normal");
     pdf.setFontSize(9);
     pdf.setTextColor(...COLORS.muted);
-    const noteLines = pdf.splitTextToSize(invoice.notes, CONTENT_W);
-    for (const nl of noteLines) {
-      y = ensureSpace(pdf, y, 5);
-      pdf.text(nl, MARGIN, y);
-      y += 4;
-    }
-  }
+    y = renderTextWithLinks(pdf, invoice.notes, MARGIN, y, CONTENT_W, 4);
+}
 
-  // ── Footer ──
+  // â”€â”€ Footer â”€â”€
   y = ensureSpace(pdf, y, 15);
   y += 8;
   if (isRetro) {
@@ -404,3 +510,5 @@ function formatDateStr(val: string): string {
     return val;
   }
 }
+
+

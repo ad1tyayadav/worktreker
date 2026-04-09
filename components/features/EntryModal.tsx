@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
@@ -255,6 +255,7 @@ export const EntryModal = ({
               rows={2}
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
+            placeholder="Tip: Use [Video title](https://...) to add a link over text."
             />
             <Input
               id="entry-reference"
@@ -330,3 +331,5 @@ export const EntryModal = ({
     </Modal>
   );
 };
+
+

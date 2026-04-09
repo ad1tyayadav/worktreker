@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import React, { forwardRef } from "react";
 import { Entry, Invoice } from "@/lib/types";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { FormattedText } from "@/components/common/FormattedText";
 
 export type InvoiceTheme = "retro" | "classic";
 
@@ -72,7 +73,7 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
               {invoice.from_name && <div className="font-bold text-ink">{invoice.from_name}</div>}
               {invoice.from_email && <div className="text-muted">{invoice.from_email}</div>}
               {invoice.from_address && (
-                <div className="text-muted whitespace-pre-line">{invoice.from_address}</div>
+                <div className="text-muted whitespace-pre-wrap break-words">{invoice.from_address}</div>
               )}
             </div>
           </div>
@@ -84,7 +85,7 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
               )}
               {invoice.to_email && <div className="text-muted">{invoice.to_email}</div>}
               {invoice.to_address && (
-                <div className="text-muted whitespace-pre-line">{invoice.to_address}</div>
+                <div className="text-muted whitespace-pre-wrap break-words">{invoice.to_address}</div>
               )}
             </div>
           </div>
@@ -179,7 +180,7 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
             {invoice.payment_info && (
               <div>
                 <div className={`${label} mb-2`}>Payment Details</div>
-                <div className={`${body} text-sm text-muted whitespace-pre-line`}>
+                <div className={`${body} text-sm text-muted whitespace-pre-wrap break-words`}>
                   {invoice.payment_info}
                 </div>
               </div>
@@ -217,8 +218,8 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
         {invoice.notes && (
           <div className={`border-t-2 ${borderDashed} p-6 sm:p-8`}>
             <div className={`${label} mb-2`}>Notes</div>
-            <div className={`${body} text-sm text-muted whitespace-pre-line`}>
-              {invoice.notes}
+            <div className={`${body} text-sm text-muted whitespace-pre-wrap break-words`}>
+              <FormattedText text={invoice.notes} />
             </div>
           </div>
         )}
@@ -228,3 +229,6 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
 );
 
 InvoicePreview.displayName = "InvoicePreview";
+
+
+
